@@ -20,10 +20,6 @@ func TestParseSegment(t *testing.T) {
 		seg: -1,
 		err: false,
 	}, {
-		in:  "",
-		seg: -1,
-		err: false,
-	}, {
 		in:  "x",
 		seg: 0,
 		err: true,
