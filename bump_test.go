@@ -7,55 +7,43 @@ import (
 
 func TestParseSegment(t *testing.T) {
 	type testCase struct {
-		isNil bool
-		in    string
-		seg   int
-		err   bool
+		in  string
+		seg int
+		err bool
 	}
 	testCases := []testCase{{
-		isNil: false,
-		in:    "1",
-		seg:   1,
-		err:   false,
+		in:  "1",
+		seg: 1,
+		err: false,
 	}, {
-		isNil: true,
-		in:    "",
-		seg:   -1,
-		err:   false,
+		in:  "",
+		seg: -1,
+		err: false,
 	}, {
-		isNil: false,
-		in:    "",
-		seg:   -1,
-		err:   false,
+		in:  "",
+		seg: -1,
+		err: false,
 	}, {
-		isNil: false,
-		in:    "x",
-		seg:   0,
-		err:   true,
+		in:  "x",
+		seg: 0,
+		err: true,
 	}, {
-		isNil: false,
-		in:    "major",
-		seg:   0,
-		err:   false,
+		in:  "major",
+		seg: 0,
+		err: false,
 	}, {
-		isNil: false,
-		in:    "minor",
-		seg:   1,
-		err:   false,
+		in:  "minor",
+		seg: 1,
+		err: false,
 	}, {
-		isNil: false,
-		in:    "patch",
-		seg:   2,
-		err:   false,
+		in:  "patch",
+		seg: 2,
+		err: false,
 	}}
 
 	for _, tc := range testCases {
-		var s *string
-		if !tc.isNil {
-			s = &tc.in
-		}
 		test := func(t *testing.T) {
-			res, err := parseSegment(s)
+			res, err := parseSegment(tc.in)
 			if !checkErr(err, tc.err) {
 				t.Errorf("wanted error: %t, but got %t", tc.err, !tc.err)
 			}
@@ -64,12 +52,10 @@ func TestParseSegment(t *testing.T) {
 			}
 		}
 		var inStr string
-		if s == nil {
-			inStr = "nil"
-		} else if *s == "" {
+		if tc.in == "" {
 			inStr = "EMPTY"
 		} else {
-			inStr = fmt.Sprintf("'%s'", *s)
+			inStr = fmt.Sprintf("'%s'", tc.in)
 		}
 		t.Run(fmt.Sprintf("parseseg_%s_%d", inStr, tc.seg), test)
 	}

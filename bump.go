@@ -19,7 +19,7 @@ func run() int {
 	segstr := flag.String("s", "", "index of segment to bump")
 	flag.Parse()
 
-	seg, err := parseSegment(segstr)
+	seg, err := parseSegment(*segstr)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "parse error: %s\n", err)
 	}
@@ -40,14 +40,14 @@ func run() int {
 	return 0
 }
 
-func parseSegment(s *string) (int, error) {
-	if s == nil || *s == "" {
+func parseSegment(s string) (int, error) {
+	if s == "" {
 		return -1, nil
 	} else {
 		var err error
-		ret, err := strconv.Atoi(*s)
+		ret, err := strconv.Atoi(s)
 		if err != nil {
-			switch *s {
+			switch s {
 			case "major":
 				return 0, nil
 			case "minor":
@@ -55,7 +55,7 @@ func parseSegment(s *string) (int, error) {
 			case "patch":
 				return 2, nil
 			default:
-				return 0, fmt.Errorf("unrecognized segment: '%s'\n", *s)
+				return 0, fmt.Errorf("unrecognized segment: '%s'\n", s)
 			}
 		}
 		return ret, nil
