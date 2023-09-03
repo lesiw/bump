@@ -88,11 +88,7 @@ func bumpVersion(old string, index int) (string, error) {
 	}
 
 	segments[index]++
-	for {
-		index++
-		if index >= len(segments) {
-			break
-		}
+	for index++; index < len(segments); index++ {
 		segments[index] = 0
 	}
 
