@@ -12,32 +12,34 @@ import (
 )
 
 func main() {
-	os.Exit(run())
+	if err := run(); err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
+	}
 }
 
-func run() int {
+func run() error {
 	segstr := flag.String("s", "", "index of segment to bump")
 	flag.Parse()
 
 	seg, err := parseSegment(*segstr)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "parse error: %s\n", err)
+		return fmt.Errorf("error parsing segment: %w", err)
 	}
 
 	input, err := readInput(os.Stdin)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error reading stdin: %s\n", err)
+		return fmt.Errorf("error reading stdin: %w", err)
 	}
 
 	output, err := bumpVersion(input, seg)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
-		return 1
+		return err
 	}
 
 	fmt.Println(output)
 
-	return 0
+	return nil
 }
 
 func parseSegment(s string) (int, error) {
@@ -55,7 +57,7 @@ func parseSegment(s string) (int, error) {
 		case "patch":
 			return 2, nil
 		default:
-			return 0, fmt.Errorf("unrecognized segment: '%s'\n", s)
+			return 0, fmt.Errorf("unrecognized segment: '%s'", s)
 		}
 	}
 
@@ -123,8 +125,9 @@ func parseVersion(s string) (string, []int, error) {
 		if unicode.IsNumber(r) {
 			segment = append(segment, r)
 		} else if r != '.' {
-			return "", segments, fmt.Errorf("parse failed: unexpected character: %s",
-				strconv.QuoteRune(r))
+			return "", segments,
+				fmt.Errorf("version parse failed: unexpected character: %s",
+					strconv.QuoteRune(r))
 		}
 
 		if r == '.' || i == len(s)-1 {
