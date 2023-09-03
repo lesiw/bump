@@ -11,6 +11,13 @@ standard output.
 * Agnostic to the number of segments.
 * Agnostic to version prefixes, like "v".
 
+## Installation
+
+```sh
+wget -O /usr/local/bin/bump https://github.com/lesiw/bump/releases/latest/download/bump-$(uname -s)-$(uname -m)
+chmod +x /usr/local/bin/bump
+```
+
 ## Usage
 
 ```text
