@@ -43,23 +43,23 @@ func run() int {
 func parseSegment(s string) (int, error) {
 	if s == "" {
 		return -1, nil
-	} else {
-		var err error
-		ret, err := strconv.Atoi(s)
-		if err != nil {
-			switch s {
-			case "major":
-				return 0, nil
-			case "minor":
-				return 1, nil
-			case "patch":
-				return 2, nil
-			default:
-				return 0, fmt.Errorf("unrecognized segment: '%s'\n", s)
-			}
-		}
-		return ret, nil
 	}
+
+	ret, err := strconv.Atoi(s)
+	if err != nil {
+		switch s {
+		case "major":
+			return 0, nil
+		case "minor":
+			return 1, nil
+		case "patch":
+			return 2, nil
+		default:
+			return 0, fmt.Errorf("unrecognized segment: '%s'\n", s)
+		}
+	}
+
+	return ret, nil
 }
 
 func readInput(reader io.Reader) (string, error) {
