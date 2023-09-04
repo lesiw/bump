@@ -11,6 +11,13 @@ import (
 	"unicode"
 )
 
+type version struct {
+	prefix   string
+	segments []int
+}
+
+type versionParser func(*version, *bufio.Reader) (versionParser, error)
+
 func main() {
 	if err := run(); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
@@ -74,29 +81,29 @@ func readInput(reader io.Reader) (string, error) {
 }
 
 func bumpVersion(old string, index int) (string, error) {
-	prefix, segments, err := parseVersion(old)
+	v, err := parseVersion(old)
 	if err != nil {
 		return "", err
 	}
 
-	if len(segments) == 0 {
+	if len(v.segments) == 0 {
 		return "", fmt.Errorf("no version segments found in '%s'", old)
-	} else if index >= len(segments) {
+	} else if index >= len(v.segments) {
 		return "", fmt.Errorf("segment index out of range: %d", index)
 	} else if index < 0 {
-		index = len(segments) - 1
+		index = len(v.segments) - 1
 	}
 
-	segments[index]++
-	for index++; index < len(segments); index++ {
-		segments[index] = 0
+	v.segments[index]++
+	for index++; index < len(v.segments); index++ {
+		v.segments[index] = 0
 	}
 
 	ret := strings.Builder{}
-	ret.WriteString(prefix)
-	for i, seg := range segments {
+	ret.WriteString(v.prefix)
+	for i, seg := range v.segments {
 		ret.WriteString(strconv.Itoa(seg))
-		if i < len(segments)-1 {
+		if i < len(v.segments)-1 {
 			ret.WriteRune('.')
 		}
 	}
@@ -104,40 +111,76 @@ func bumpVersion(old string, index int) (string, error) {
 	return ret.String(), nil
 }
 
-func parseVersion(s string) (string, []int, error) {
-	var prefixDone bool
-	var prefix []rune
-	var segment []rune
-	var segments []int
+func parseVersion(s string) (*version, error) {
+	v := &version{}
+	r := bufio.NewReader(strings.NewReader(s))
+	parseState := parseVersionPrefix
 
-	for i, r := range s {
-		if !prefixDone && unicode.IsNumber(r) {
-			prefixDone = true
-		} else if !prefixDone {
-			prefix = append(prefix, r)
-			continue
+	for {
+		var err error
+		parseState, err = parseState(v, r)
+		if err != nil {
+			return nil, err
+		}
+		if parseState == nil {
+			break
+		}
+	}
+
+	return v, nil
+}
+
+func parseVersionPrefix(v *version, reader *bufio.Reader) (versionParser, error) {
+	var prefix []rune
+	defer func() { v.prefix = string(prefix) }()
+
+	for {
+		r, _, err := reader.ReadRune()
+		if err == io.EOF {
+			return nil, nil
+		}
+		if unicode.IsNumber(r) {
+			_ = reader.UnreadRune()
+			return parseVersionSegments, nil
+		}
+		prefix = append(prefix, r)
+	}
+}
+
+func parseVersionSegments(v *version, reader *bufio.Reader) (versionParser, error) {
+	var segment []rune
+	for {
+		r, _, err := reader.ReadRune()
+		if err == io.EOF {
+			return nil, nil
 		}
 
 		if unicode.IsNumber(r) {
 			segment = append(segment, r)
-		} else if r != '.' {
-			return "", segments,
-				fmt.Errorf("version parse failed: unexpected character: %s",
-					strconv.QuoteRune(r))
+			if !bufend(reader) {
+				continue
+			}
 		}
 
-		if r == '.' || i == len(s)-1 {
-			if len(segment) == 0 {
-				return "", segments, fmt.Errorf("parse failed: unexpected '.'")
-			}
-			int, err := strconv.Atoi(string(segment))
-			if err != nil {
-				return "", segments, fmt.Errorf("parse failed: %w", err)
-			}
-			segments = append(segments, int)
-			segment = []rune{}
+		if r == '.' && len(segment) == 0 {
+			return nil, fmt.Errorf("parse failed: unexpected '.'")
+		} else if !unicode.IsNumber(r) && r != '.' {
+			return nil, fmt.Errorf("version parse failed: unexpected character: %s",
+				strconv.QuoteRune(r))
 		}
+
+		int, err := strconv.Atoi(string(segment))
+		if err != nil {
+			return nil, fmt.Errorf("parse failed: %w", err)
+		}
+
+		v.segments = append(v.segments, int)
+		segment = []rune{}
 	}
+}
 
-	return string(prefix), segments, nil
+func bufend(reader *bufio.Reader) bool {
+	_, _, nextErr := reader.ReadRune()
+	_ = reader.UnreadRune()
+	return (nextErr == io.EOF)
 }
