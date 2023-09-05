@@ -8,9 +8,8 @@ standard output.
 `bump` is:
 
 * A small, unix-like utility, designed for use in build scripts.
-* Agnostic to the number of segments.
-* Agnostic to version prefixes, like "v".
 * Compatible with semantic versioning, but does not require it.
+* Agnostic to version prefixes, like "v".
 
 ## Installation
 
