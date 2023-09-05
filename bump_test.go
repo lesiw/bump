@@ -35,6 +35,10 @@ func TestParseSegment(t *testing.T) {
 		in:  "patch",
 		seg: 2,
 		err: false,
+	}, {
+		in:  "pre",
+		seg: 3,
+		err: false,
 	}}
 
 	for _, tc := range testCases {
@@ -107,6 +111,54 @@ func TestBumpVersion(t *testing.T) {
 		in:  "1.2.3",
 		seg: -1,
 		out: "1.2.4",
+	}, {
+		in:  "1.2.3",
+		seg: 3,
+		out: "1.2.4-rc.1",
+	}, {
+		in:  "1.2.4-rc.1",
+		seg: 3,
+		out: "1.2.4-rc.2",
+	}, {
+		in:  "1.2.4-rc",
+		seg: 3,
+		out: "1.2.4-rc.1",
+	}, {
+		in:  "1.2.4-rc1",
+		seg: 3,
+		out: "1.2.4-rc2",
+	}, {
+		in:  "1.2.4-rc.42",
+		seg: 2,
+		out: "1.2.4",
+	}, {
+		in:  "1.2.3+sometag",
+		seg: 2,
+		out: "1.2.4+sometag",
+	}, {
+		in:  "1.2.3-rc.4",
+		seg: 1,
+		out: "1.3.0",
+	}, {
+		in:  "1.2.3-alpha.6",
+		seg: 0,
+		out: "2.0.0",
+	}, {
+		in:  "version 100.200.300-release-candidate---42+long.tag.with+symbols",
+		seg: 0,
+		out: "version 101.0.0+long.tag.with+symbols",
+	}, {
+		in:  "v1.2.3-rc.1.2.3",
+		seg: 3,
+		out: "v1.2.3-rc.1.2.4",
+	}, {
+		in:  "1.2-rc.002",
+		seg: 2,
+		out: "1.2-rc.003",
+	}, {
+		in:  "version 1---rc.042.1",
+		seg: 1,
+		out: "version 1---rc.042.2",
 	}}
 
 	for _, tc := range testCases {
@@ -124,11 +176,11 @@ func TestBumpVersion(t *testing.T) {
 }
 
 func TestBumpVersionOutOfRange(t *testing.T) {
-	_, err := bumpVersion("1.2.3", 3)
+	_, err := bumpVersion("1.2.3", 4)
 	if err == nil {
 		t.Fatalf("expected error")
 	}
-	want := "segment index out of range: 3"
+	want := "segment index out of range: 4"
 	if err.Error() != want {
 		t.Errorf("want '%s', got '%s'", want, err.Error())
 	}
