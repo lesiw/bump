@@ -15,8 +15,8 @@ standard output.
 ## Installation
 
 ```sh
-wget -O /usr/local/bin/bump https://github.com/lesiw/bump/releases/latest/download/bump-$(uname -s)-$(uname -m)
-chmod +x /usr/local/bin/bump
+> bump curl -L https://github.com/lesiw/bump/releases/latest/download/bump-`uname -s`-`uname -m`
+sudo install bump /usr/local/bin/bump
 ```
 
 ## Usage
