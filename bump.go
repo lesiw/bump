@@ -95,7 +95,11 @@ func bumpVersion(s string, index int) (string, error) {
 	} else if index > len(v.segments) {
 		return "", fmt.Errorf("segment index out of range: %d", index)
 	} else if index < 0 {
-		index = len(v.segments) - 1
+		if v.prerelease == "" {
+			index = len(v.segments) - 1
+		} else {
+			index = len(v.segments)
+		}
 	}
 
 	if index == len(v.segments) {

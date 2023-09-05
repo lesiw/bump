@@ -159,6 +159,10 @@ func TestBumpVersion(t *testing.T) {
 		in:  "version 1---rc.042.1",
 		seg: 1,
 		out: "version 1---rc.042.2",
+	}, {
+		in:  "1.2.3-rc.8",
+		seg: -1,
+		out: "1.2.3-rc.9",
 	}}
 
 	for _, tc := range testCases {
