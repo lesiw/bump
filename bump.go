@@ -233,8 +233,7 @@ func parseVersionPrerelease(v *version, reader *bufio.Reader) (versionParser, er
 			return nil, nil
 		}
 		if r == '+' {
-			_ = reader.UnreadRune()
-			return parseVersionSegments, nil
+			return parseVersionTag, nil
 		}
 		prerelease = append(prerelease, r)
 	}
