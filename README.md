@@ -73,5 +73,5 @@ the version according to the keyword, otherwise bump the patch segment.
 
 ```sh
 SEGMENT=$(git show -s --format=%s | awk -F'+' 'BEGIN{RS=" "} /\+/ {print $2}')
-bump -s "${SEGMENT:-patch}"
+git tag "$(git describe --abbrev=0 --tags | bump -s "${SEGMENT:-patch}")"
 ```
