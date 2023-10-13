@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -21,34 +22,47 @@ type version struct {
 type versionParser func(*version, *bufio.Reader) (versionParser, error)
 
 func main() {
-	if err := run(); err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
-		os.Exit(1)
-	}
+	os.Exit(run())
 }
 
-func run() error {
+func run() int {
 	segstr := flag.String("s", "", "index of segment to bump")
 	flag.Parse()
 
 	seg, err := parseSegment(*segstr)
 	if err != nil {
-		return fmt.Errorf("error parsing segment: %w", err)
+		fmt.Fprintf(os.Stderr, "error parsing segment: %s\n", err)
+		return 2
 	}
 
-	input, err := readInput(os.Stdin)
-	if err != nil {
-		return fmt.Errorf("error reading stdin: %w", err)
+	r := bufio.NewReader(os.Stdin)
+
+	status := 0
+
+	for {
+		line, err := readInput(r)
+
+		if line != "" {
+			output, err := bumpVersion(line, seg)
+
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error bumping version: %s\n", err)
+				status = 1
+				continue
+			}
+
+			fmt.Println(output)
+		}
+
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				return status
+			} else {
+				fmt.Fprintf(os.Stderr, "error reading line: %s\n", err)
+				return 2
+			}
+		}
 	}
-
-	output, err := bumpVersion(input, seg)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(output)
-
-	return nil
 }
 
 func parseSegment(s string) (int, error) {
@@ -75,13 +89,10 @@ func parseSegment(s string) (int, error) {
 	return ret, nil
 }
 
-func readInput(reader io.Reader) (string, error) {
-	r := bufio.NewReader(reader)
-	input, err := r.ReadString('\n')
-	if err != nil {
-		return "", err
-	}
-	return strings.TrimSpace(input), nil
+func readInput(r *bufio.Reader) (string, error) {
+	lineraw, err := r.ReadString('\n')
+	line := strings.TrimSuffix(lineraw, "\n")
+	return line, err
 }
 
 func bumpVersion(s string, index int) (string, error) {
