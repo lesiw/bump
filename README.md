@@ -13,9 +13,16 @@ standard output.
 
 ## Installation
 
+### `curl`
+
 ```sh
-> bump curl -L https://github.com/lesiw/bump/releases/latest/download/bump-`uname -s`-`uname -m`
-sudo install bump /usr/local/bin/bump
+curl -L lesiw.io/bump | sh
+```
+
+### `go install`
+
+```sh
+go install lesiw.io/bump@latest
 ```
 
 ## Usage
