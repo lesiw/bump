@@ -173,7 +173,9 @@ func (v *version) String() string {
 	return b.String()
 }
 
-func parseVersionPrefix(v *version, reader *bufio.Reader) (versionParser, error) {
+func parseVersionPrefix(
+	v *version, reader *bufio.Reader,
+) (versionParser, error) {
 	var prefix []rune
 	defer func() { v.prefix = string(prefix) }()
 
@@ -190,7 +192,9 @@ func parseVersionPrefix(v *version, reader *bufio.Reader) (versionParser, error)
 	}
 }
 
-func parseVersionSegments(v *version, reader *bufio.Reader) (versionParser, error) {
+func parseVersionSegments(
+	v *version, reader *bufio.Reader,
+) (versionParser, error) {
 	var segment []rune
 
 	storeSegment := func() {
@@ -228,13 +232,17 @@ func parseVersionSegments(v *version, reader *bufio.Reader) (versionParser, erro
 		if unicode.IsNumber(r) {
 			segment = append(segment, r)
 		} else {
-			return nil, fmt.Errorf("version parse failed: unexpected character: %s",
+			return nil, fmt.Errorf(
+				"version parse failed: "+
+					"unexpected character: %s",
 				strconv.QuoteRune(r))
 		}
 	}
 }
 
-func parseVersionPrerelease(v *version, reader *bufio.Reader) (versionParser, error) {
+func parseVersionPrerelease(
+	v *version, reader *bufio.Reader,
+) (versionParser, error) {
 	var prerelease []rune
 	defer func() { v.prerelease = string(prerelease) }()
 

@@ -144,7 +144,8 @@ func TestBumpVersion(t *testing.T) {
 		seg: 0,
 		out: "2.0.0",
 	}, {
-		in:  "version 100.200.300-release-candidate---42+long.tag.with+symbols",
+		in: "version 100.200.300-release-candidate" +
+			"---42+long.tag.with+symbols",
 		seg: 0,
 		out: "version 101.0.0+long.tag.with+symbols",
 	}, {
